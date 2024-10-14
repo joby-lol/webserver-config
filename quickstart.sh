@@ -1,5 +1,13 @@
 #!/bin/bash
 
+# Script to quickly set up a new server
+# Download and install by running:
+# curl -sSL https://raw.githubusercontent.com/joby-lol/webserver-config/refs/heads/main/quickstart.sh | bash
+if [ "$EUID" -ne 0 ]; then 
+    echo "Please run as root or with sudo"
+    exit
+fi
+
 # Update package list
 sudo apt update
 

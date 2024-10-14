@@ -1,12 +1,32 @@
 #!/bin/bash
 
+# Script to add a site to the server
+if [ "$EUID" -ne 0 ]; then 
+    echo "Please run as root or with sudo"
+    exit
+fi
+
 # Prompt for user input
 read -p "Enter the desired username: " username
-read -sp "Enter the password for $username: " password
-echo
 read -p "Enter the domain name (e.g., example.com): " domain
+read -p "Enter the email address to be used for this account: " email
 read -sp "Enter your Cloudflare API key: " cf_api_key
 echo
+
+# Generated passwords
+password=$(openssl rand -base64 12)
+mysql_password=$(openssl rand -base64 12)
+
+# Get hostname or IP
+hostname=$(hostname -f)
+if [ $? -ne 0 ] || [ -z "$hostname" ] || [[ "$hostname" != *"."* ]]; then
+    echo "Failed to get a valid hostname. Falling back to IP address."
+    hostname=$(curl -s -4 icanhazip.com || curl -s -4 ifconfig.me || ip addr show | grep 'inet ' | grep -v 127.0.0.1 | awk '{print $2}' | cut -d/ -f1 | head -n 1)
+    if [ -z "$hostname" ]; then
+        echo "Failed to determine IP address. Using 'localhost' as fallback."
+        hostname="localhost"
+    fi
+fi
 
 # Create the user and add to www-data group
 sudo useradd -m -s /bin/bash -G www-data $username
@@ -31,19 +51,53 @@ sudo bash -c "echo '
 umask 022
 ' >> /etc/nginx/nginx.conf"
 
+# Create MySQL user and grant permissions
+sudo mysql <<EOF
+CREATE USER '${username}'@'localhost' IDENTIFIED BY '${mysql_password}';
+CREATE USER '${username}'@'%' IDENTIFIED BY '${mysql_password}';
+GRANT ALL PRIVILEGES ON \`${username}_%\`.* TO '${username}'@'localhost';
+GRANT ALL PRIVILEGES ON \`${username}_%\`.* TO '${username}'@'%';
+GRANT CREATE USER ON *.* TO '${username}'@'localhost' WITH GRANT OPTION;
+GRANT CREATE USER ON *.* TO '${username}'@'%' WITH GRANT OPTION;
+GRANT ROLE_ADMIN ON *.* TO '${username}'@'localhost';
+GRANT ROLE_ADMIN ON *.* TO '${username}'@'%';
+FLUSH PRIVILEGES;
+EOF
+
+# Create site info file
+info_file="$main_web_root/site_info.txt"
+sudo bash -c "cat > $info_file << EOL
+Domain: $domain
+Email: $email
+
+SFTP Host: $hostname
+Username: $username
+Password: $password
+
+MySQL Username: $username
+MySQL Password: $mysql_password
+MySQL Host: $hostname
+EOL"
+sudo chown $username:www-data $info_file
+sudo chmod 600 $info_file
+
 # Create Cloudflare credentials file
-cf_credentials="/root/.cloudflare/$domain.ini"
-sudo mkdir -p /root/.cloudflare
+cf_credentials="$main_web_root/cloudflare.ini"
 sudo bash -c "cat > $cf_credentials << EOL
 dns_cloudflare_api_token = $cf_api_key
 EOL"
+# note that cloudflare credentials are only even readable  by root, to make it
+# harder for attackers to get them, since they would allow lateral movement
+sudo chown root:root $cf_credentials
 sudo chmod 600 $cf_credentials
 
 # Request wildcard certificate using Cloudflare DNS challenge
 sudo certbot certonly --dns-cloudflare \
     --dns-cloudflare-credentials $cf_credentials \
     -d $domain -d *.$domain \
-    --non-interactive
+    --non-interactive \
+    --agree-tos \
+    --email $email
 
 # Create Nginx configuration
 nginx_config="/etc/nginx/sites-available/$domain"
@@ -132,5 +186,6 @@ echo "Setup complete for $domain"
 echo "Main website files should be placed in: $main_web_root/_main/www"
 echo "Subdomain files should be placed in: $main_web_root/subdomains/[subdomain]/www"
 echo "Logs will be stored in: $main_web_root/logs"
+echo "Site information (including MySQL credentials) is stored in: $info_file"
 echo "Cloudflare credentials for this domain are stored in: $cf_credentials"
 echo "Remember to log out and log back in for group changes to take effect."

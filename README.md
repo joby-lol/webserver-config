@@ -13,3 +13,10 @@ It is adviseable to review the contents of `quickstart.sh` before running it, as
 ```bash
 curl -sSL https://raw.githubusercontent.com/joby-lol/webserver-config/refs/heads/main/quickstart.sh | bash
 ```
+## Adding a site
+
+To set up a site, run `add-site.sh` and it will prompt you for all the data necessary. What you will need before running it is:
+
+* A domain name using Cloudflare's DNS, with both @ and * subdomains pointing at your server
+  * If you want to use their proxy, you need to turn on the SSL/TLS encryption mode of Full, Full(Strict), or Strict(SSL-Only Origin Pull). Flexible or Off will not work.
+* A Cloudflare API key capable of editing the DNS for that domain
