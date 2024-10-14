@@ -4,7 +4,7 @@
 sudo apt update
 
 # Install curl and git
-sudo apt install -y curl git
+sudo apt install -y git
 
 # Clone the repository
 git clone https://github.com/joby-lol/webserver-config.git
