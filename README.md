@@ -2,16 +2,16 @@
 
 This repository contains scripts for setting up a very basic web server and adding new sites. It is not perfect, but it will get you off the ground quickly.
 
-This script will install PHP and nginx, and create a 
+## Installation
 
-## One-liner
-
-The following command will install these tools.
-
-It is adviseable to review the contents of `quickstart.sh` before running it, as it's generally a good security practice to understand what a script does before executing it, especially with elevated privileges. You may need to install `curl` first.
+These commands will clone the tool onto your server and do the basic installation and configuration of core server software. At the moment that is Nginx, PHP, MySQL, and Certbot. A variety of fail2ban and ufw security measures are also added to improve your security posture.
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/joby-lol/webserver-config/refs/heads/main/quickstart.sh | bash
+# clone the repository and cd into it
+git clone https://github.com/joby-lol/webserver-config
+cd webserver-config
+# run installation script
+./install.sh
 ```
 ## Adding a site
 
