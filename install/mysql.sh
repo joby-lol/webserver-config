@@ -54,7 +54,8 @@ bantime  = 3600
 EOL
 
 # Ensure fail2ban can read the MySQL log
-usermod -a -G adm fail2ban
+# Note: maybe not necessary on Ubuntu, as fail2ban runs as root
+# usermod -a -G adm fail2ban
 
 # Create MySQL auth filter for fail2ban
 cat > /etc/fail2ban/filter.d/mysqld-auth.conf << EOL

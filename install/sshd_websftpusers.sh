@@ -51,7 +51,7 @@ EOF
 echo "Created $CONFIG_FILE with $NEW_GROUP configuration."
 
 # Restart SSH service to apply changes
-systemctl restart sshd
+systemctl restart ssh
 echo "SSH service restarted to apply changes."
 
 echo "Setup complete. New group $NEW_GROUP has been created and SSHD configured for SFTP access."
