@@ -43,14 +43,15 @@ EOL
 systemctl restart mysql
 
 # Create MySQL fail2ban configuration
-cat > /etc/fail2ban/jail.d/mysql.conf << EOL
-[mysqld-auth]
-enabled  = true
-filter   = mysqld-auth
-port     = 3306
-logpath  = /var/log/mysql/error.log
-maxretry = 5
-bantime  = 3600
+tee /etc/fail2ban/jail.d/mysql.conf << 'EOL'
+[mysql]
+enabled = true
+filter = mysql
+port = 3306
+logpath = /var/log/mysql/error.log
+maxretry = 10
+findtime = 600
+bantime = 3600
 EOL
 
 # Ensure fail2ban can read the MySQL log
@@ -58,9 +59,9 @@ EOL
 # usermod -a -G adm fail2ban
 
 # Create MySQL auth filter for fail2ban
-cat > /etc/fail2ban/filter.d/mysqld-auth.conf << EOL
+tee /etc/fail2ban/filter.d/mysql.conf << 'EOL'
 [Definition]
-failregex = ^%(__prefix_line)s[0-9]+ \[Warning\] Access denied for user '\w+'@'<HOST>'
+failregex = ^\s*\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d+Z\s+\d+\s+\[Warning\].*IP address '<HOST>'.*$
 ignoreregex =
 EOL
 

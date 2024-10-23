@@ -39,6 +39,14 @@ server {
 
     server_name _;
 
+    # Apply general rate limit
+    limit_req zone=general burst=100 nodelay;
+
+    # Check for banned IPs
+    if (\$is_banned) {
+        return 403 "Forbidden";
+    }
+
     location / {
         try_files \$uri \$uri/ =404;
     }
