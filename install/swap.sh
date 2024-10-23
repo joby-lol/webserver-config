@@ -9,7 +9,7 @@ fi
 # Exit if swapfile exists
 if [ -f /swapfile ]; then
     echo "Swapfile already exists. Exiting..."
-    exit 1
+    exit 0
 fi
 
 # Swap Setup
