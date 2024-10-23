@@ -6,33 +6,34 @@ if [ "$EUID" -ne 0 ]; then
     exit 1
 fi
 
+# Create maps directory if it doesn't exist
+echo "Creating maps directory..."
+mkdir -p /etc/nginx/maps
+
 # Create banned IPs file
 echo "Creating banned IPs file..."
-touch /etc/nginx/conf.d/banned_ips.conf
-chown www-data:www-data /etc/nginx/conf.d/banned_ips.conf
+touch /etc/nginx/maps/banned_ips.conf
+chown www-data:www-data /etc/nginx/maps/banned_ips.conf
 
 # Create NGINX configuration for fail2ban check
 echo "Creating NGINX configuration..."
 tee /etc/nginx/conf.d/10-fail2ban-check.conf << 'CONFFILE'
 map $http_cf_connecting_ip $is_banned {
     default 0;
-    include /etc/nginx/conf.d/banned_ips.conf;
+    volatile;
+    include /etc/nginx/maps/banned_ips.conf;
 }
 CONFFILE
 
 # Create fail2ban action
-tee /etc/fail2ban/action.d/nginx-banned-ips.conf << 'ACTIONFILE'
+cat > /etc/fail2ban/action.d/nginx-banned-ips.conf << 'ACTIONFILE'
 [Definition]
 actionstart = 
 actionstop = 
 actioncheck = 
-actionban = grep -q '^<ip> 1;$' /etc/nginx/conf.d/banned_ips.conf || echo '<ip> 1;' >> /etc/nginx/conf.d/banned_ips.conf && nginx -s reload
-actionunban = sed -i '/^<ip> 1;$/d' /etc/nginx/conf.d/banned_ips.conf && nginx -s reload
+actionban = grep -q '^<ip> 1;$' /etc/nginx/maps/banned_ips.conf || echo '<ip> 1;' >> /etc/nginx/maps/banned_ips.conf && nginx -s reload
+actionunban = sed -i '/^<ip> 1;$/d' /etc/nginx/maps/banned_ips.conf && nginx -s reload
 ACTIONFILE
-
-# Clean up existing duplicates
-sort -u /etc/nginx/conf.d/banned_ips.conf > /etc/nginx/conf.d/banned_ips.conf.tmp && \
-mv /etc/nginx/conf.d/banned_ips.conf.tmp /etc/nginx/conf.d/banned_ips.conf
 
 # Test NGINX configuration
 echo "Testing NGINX configuration..."
