@@ -21,15 +21,18 @@ map $http_cf_connecting_ip $is_banned {
 CONFFILE
 
 # Create fail2ban action
-echo "Creating fail2ban action..."
 tee /etc/fail2ban/action.d/nginx-banned-ips.conf << 'ACTIONFILE'
 [Definition]
 actionstart = 
 actionstop = 
 actioncheck = 
-actionban = echo '<ip> 1;' >> /etc/nginx/conf.d/banned_ips.conf && nginx -s reload
-actionunban = sed -i '/<ip>/d' /etc/nginx/conf.d/banned_ips.conf && nginx -s reload
+actionban = grep -q '^<ip> 1;$' /etc/nginx/conf.d/banned_ips.conf || echo '<ip> 1;' >> /etc/nginx/conf.d/banned_ips.conf && nginx -s reload
+actionunban = sed -i '/^<ip> 1;$/d' /etc/nginx/conf.d/banned_ips.conf && nginx -s reload
 ACTIONFILE
+
+# Clean up existing duplicates
+sort -u /etc/nginx/conf.d/banned_ips.conf > /etc/nginx/conf.d/banned_ips.conf.tmp && \
+mv /etc/nginx/conf.d/banned_ips.conf.tmp /etc/nginx/conf.d/banned_ips.conf
 
 # Test NGINX configuration
 echo "Testing NGINX configuration..."
