@@ -1,9 +1,7 @@
 #!/bin/bash
 
-# Define the log format
-LOG_FORMAT='log_format domain_combined '\''$host $remote_addr - $remote_user [$time_local] '\
-''\"$request\" $status $body_bytes_sent '\
-''\"$http_referer\" \"$http_user_agent\"'\'';'
+# Define the log format (all on one line)
+LOG_FORMAT='log_format domain_combined '\''$host $remote_addr - $remote_user [$time_local] "\"$request\"" $status $body_bytes_sent "\"$http_referer\"" "\"$http_user_agent\""'\'';'
 
 # Check if we're root
 if [ "$EUID" -ne 0 ]; then 
@@ -12,7 +10,10 @@ if [ "$EUID" -ne 0 ]; then
 fi
 
 # Backup the original config
-cp /etc/nginx/nginx.conf /etc/nginx/nginx.conf.bak
+if ! cp /etc/nginx/nginx.conf /etc/nginx/nginx.conf.bak; then
+    echo "Failed to create backup"
+    exit 1
+fi
 
 # Check if format already exists
 if grep -q "log_format domain_combined" /etc/nginx/nginx.conf; then
