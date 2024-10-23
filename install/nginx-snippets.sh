@@ -10,8 +10,8 @@ fi
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 # Define source and destination directories using absolute path
-SRC_DIR="$SCRIPT_DIR/nginx-conf"
-DEST_DIR="/etc/nginx/conf.d"
+SRC_DIR="$SCRIPT_DIR/nginx-snippets"
+DEST_DIR="/etc/nginx/snippets"
 
 # Check if source directory exists
 if [ ! -d "$SRC_DIR" ]; then
