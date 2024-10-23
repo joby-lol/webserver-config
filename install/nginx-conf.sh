@@ -6,8 +6,11 @@ if [ "$EUID" -ne 0 ]; then
     exit 1
 fi
 
-# Define source and destination directories
-SRC_DIR="nginx-conf"
+# Get the directory where this script is located
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+# Define source and destination directories using absolute path
+SRC_DIR="$SCRIPT_DIR/nginx-conf"
 DEST_DIR="/etc/nginx/conf.d"
 
 # Check if source directory exists
