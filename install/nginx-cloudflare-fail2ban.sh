@@ -10,6 +10,21 @@ fi
 echo "Installing required packages..."
 apt-get install -y nginx-extras
 
+# Add load_module directive to nginx.conf if not present
+echo "Adding load_module directive to nginx.conf if needed..."
+if ! grep -q "^load_module.*ngx_http_js_module.so" /etc/nginx/nginx.conf; then
+    # Create temporary file
+    sed '/^events {/i load_module modules/ngx_http_js_module.so;' /etc/nginx/nginx.conf > /tmp/nginx.conf.tmp
+    # Check if the modification was successful
+    if nginx -t -c /tmp/nginx.conf.tmp; then
+        mv /tmp/nginx.conf.tmp /etc/nginx/nginx.conf
+    else
+        rm /tmp/nginx.conf.tmp
+        echo "Failed to modify nginx.conf safely. Please add 'load_module modules/ngx_http_js_module.so;' manually."
+        exit 1
+    fi
+fi
+
 # Create the fail2ban check script
 echo "Creating fail2ban check script..."
 tee /usr/local/bin/check_fail2ban.sh << 'SCRIPT'
