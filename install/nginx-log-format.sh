@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Define the log format
-LOG_FORMAT="log_format domain_combined '$host \$remote_addr - \$remote_user [\$time_local] \"\$request\" \$status \$body_bytes_sent \"\$http_referer\" \"\$http_user_agent\"';"
+LOG_FORMAT="log_format domain_combined '\$host \$remote_addr - \$remote_user [\$time_local] \"\$request\" \$status \$body_bytes_sent \"\$http_referer\" \"\$http_user_agent\"';"
 
 # Check if we're root
 if [ "$EUID" -ne 0 ]; then 
