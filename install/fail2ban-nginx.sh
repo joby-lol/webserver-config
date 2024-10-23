@@ -37,6 +37,8 @@ logpath = /var/log/nginx/access.log
 maxretry = 10
 findtime = 600
 bantime = 3600
+action = iptables-multiport[name=nginx-strict]
+         nginx-banned-ips
 
 [nginx-4xx-moderate]
 enabled = true
@@ -46,6 +48,8 @@ logpath = /var/log/nginx/access.log
 maxretry = 10
 findtime = 600
 bantime = 1800
+action = iptables-multiport[name=nginx-moderate]
+         nginx-banned-ips
 
 [nginx-4xx-lenient]
 enabled = true
@@ -55,6 +59,8 @@ logpath = /var/log/nginx/access.log
 maxretry = 20
 findtime = 600
 bantime = 900
+action = iptables-multiport[name=nginx-lenient]
+         nginx-banned-ips
 EOL
 
 echo "fail2ban setup for Nginx errors completed with strict, moderate, and lenient jails."

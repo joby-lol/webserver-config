@@ -35,6 +35,8 @@ filter = sshd
 logpath = /var/log/auth.log
 maxretry = 10
 bantime = 86400
+action = iptables-multiport[name=sshd]
+         nginx-banned-ips
 
 [nginx-http-auth]
 enabled = true
@@ -43,6 +45,8 @@ port = http,https
 logpath = /var/log/nginx/error.log
 maxretry = 5
 bantime = 3600
+action = iptables-multiport[name=nginx-http-auth]
+         nginx-banned-ips
 EOL
 
 # SSH hardening

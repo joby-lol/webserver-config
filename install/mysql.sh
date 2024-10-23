@@ -52,6 +52,8 @@ logpath = /var/log/mysql/error.log
 maxretry = 10
 findtime = 600
 bantime = 3600
+action = iptables-multiport[name=mysql]
+         nginx-banned-ips
 EOL
 
 # Ensure fail2ban can read the MySQL log
