@@ -39,13 +39,18 @@ main_web_root="/var/www/$domain"
 sudo mkdir -p "$main_web_root"/{_main/www,subdomains,logs}
 
 # Create the user with the web root as home directory and add to www-data and websftpusers groups
-sudo useradd -m -d /var/www/$domain -s /usr/sbin/nologin -U -G www-data,websftpusers $username
+sudo useradd -m -d /var/www/$domain -s /bin/false -U -G www-data,websftpusers $username
 echo "$username:$password" | sudo chpasswd
 
 # Set ownership and permissions for the main site directory
 sudo chown -R "$username:www-data" "$main_web_root"
 sudo find "$main_web_root" -type d -exec chmod 2750 {} +
 sudo find "$main_web_root" -type f -exec chmod 640 {} +
+
+# Set ownership and permissions for the main web root
+# SFTP chroot requires the user's home directory to be owned by root and not writable by others
+sudo chown "root:www-data" "$main_web_root"
+sudo chmod 755 "$main_web_root"
 
 # Set ownership and permissions for the logs directory
 sudo chown root:www-data "$main_web_root/logs"
@@ -103,9 +108,6 @@ sudo cp "$(realpath "site-config.conf")" "$nginx_config"
 
 # replace $DOMAIN placeholder in the nginx config file
 sudo sed -i "s/\$DOMAIN/$domain/g" "$nginx_config"
-
-# replace $MAIN_WEB_ROOT placeholder in the nginx config file
-sudo sed -i "s#\$MAIN_WEB_ROOT#$main_web_root#g" "$nginx_config"
 
 # Enable the site
 sudo ln -sf "$nginx_config" /etc/nginx/sites-enabled/
