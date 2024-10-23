@@ -11,19 +11,19 @@ echo "Setting up fail2ban for Nginx errors with strict, moderate, and lenient ja
 # Create the filter files
 cat > /etc/fail2ban/filter.d/nginx-4xx-strict.conf << EOL
 [Definition]
-failregex = ^<HOST> .* "(GET|POST|HEAD|PUT|DELETE|CONNECT|OPTIONS|TRACE|PATCH).*" (401|403) .*$
+failregex = ^[^ ]+ <HOST> .* "(GET|POST|HEAD|PUT|DELETE|CONNECT|OPTIONS|TRACE|PATCH).*" (401|403) .*$
 ignoreregex =
 EOL
 
 cat > /etc/fail2ban/filter.d/nginx-4xx-moderate.conf << EOL
 [Definition]
-failregex = ^<HOST> .* "(GET|POST|HEAD|PUT|DELETE|CONNECT|OPTIONS|TRACE|PATCH).*" (400|405|406|408|413|444) .*$
+failregex = ^[^ ]+ <HOST> .* "(GET|POST|HEAD|PUT|DELETE|CONNECT|OPTIONS|TRACE|PATCH).*" (400|405|406|408|413|444) .*$
 ignoreregex =
 EOL
 
 cat > /etc/fail2ban/filter.d/nginx-4xx-lenient.conf << EOL
 [Definition]
-failregex = ^<HOST> .* "(GET|POST|HEAD|PUT|DELETE|CONNECT|OPTIONS|TRACE|PATCH).*" (404|429) .*$
+failregex = ^[^ ]+ <HOST> .* "(GET|POST|HEAD|PUT|DELETE|CONNECT|OPTIONS|TRACE|PATCH).*" (404|429) .*$
 ignoreregex =
 EOL
 
