@@ -49,7 +49,7 @@ enabled = true
 filter = mysql
 port = 3306
 logpath = /var/log/mysql/error.log
-maxretry = 10
+maxretry = 20
 findtime = 600
 bantime = 3600
 action = iptables-multiport[name=mysql]

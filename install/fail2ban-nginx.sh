@@ -34,7 +34,7 @@ enabled = true
 port = http,https
 filter = nginx-4xx-strict
 logpath = /var/log/nginx/access.log
-maxretry = 10
+maxretry = 20
 findtime = 600
 bantime = 3600
 action = iptables-multiport[name=nginx-strict]
@@ -45,7 +45,7 @@ enabled = true
 port = http,https
 filter = nginx-4xx-moderate
 logpath = /var/log/nginx/access.log
-maxretry = 10
+maxretry = 20
 findtime = 600
 bantime = 1800
 action = iptables-multiport[name=nginx-moderate]
@@ -56,7 +56,7 @@ enabled = true
 port = http,https
 filter = nginx-4xx-lenient
 logpath = /var/log/nginx/access.log
-maxretry = 20
+maxretry = 40
 findtime = 600
 bantime = 900
 action = iptables-multiport[name=nginx-lenient]
