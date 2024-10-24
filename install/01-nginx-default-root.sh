@@ -44,7 +44,7 @@ server {
 
     # Check for banned IPs
     if (\$is_banned) {
-        return 403 "IP banned for bad behavior";
+        return 403;
     }
 
     location / {
