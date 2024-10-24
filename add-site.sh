@@ -36,7 +36,7 @@ hostname=$(hostname -f)
 
 # Set up directory structure
 main_web_root="/var/www/$domain"
-sudo mkdir -p "$main_web_root"/{_main/www,subdomains,logs}
+sudo mkdir -p "$main_web_root"/{_main/www,subdomains,logs,error-pages}
 
 # Create the user with the web root as home directory and add to www-data and websftpusers groups
 sudo useradd -m -d /var/www/$domain -s /bin/false -U -G www-data,websftpusers $username
@@ -82,6 +82,12 @@ Password: $password
 MySQL Username: $username
 MySQL Password: $mysql_password
 MySQL Host: $hostname
+
+Main web root: $main_web_root/_main/www
+Subdomain web root: $main_web_root/subdomains/[subdomain]/www
+
+Custom error pages: $main_web_root/error-pages
+Subdomain custom error pages: $main_web_root/subdomains/[subdomain]/error-pages
 EOL"
 sudo chown "$username:$username" "$info_file"
 sudo chmod 600 "$info_file"
@@ -138,7 +144,9 @@ sudo systemctl reload nginx
 echo "Setup complete for $domain"
 echo "Access via SFTP at $hostname with the username $username and the password $password"
 echo "Main website files should be placed in: _main/www"
+echo "Custom error pages can be placed in: error-pages"
 echo "Subdomain files should be placed in: subdomains/[subdomain]/www"
+echo "Subdomain custom error pages can be placed in: subdomains/[subdomain]/error-pages"
 echo "Site information (including MySQL credentials) is stored in: $info_file"
 echo "Cloudflare credentials for this domain are stored in: $cf_credentials"
 echo "Logs are stored in: logs"
