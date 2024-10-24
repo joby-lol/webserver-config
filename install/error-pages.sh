@@ -22,9 +22,9 @@ fi
 # Create destination directory if it doesn't exist
 mkdir -p "$DEST_DIR"
 
-# Copy all .conf files
-echo "Copying configuration files..."
-cp -v "$SRC_DIR"/*.conf "$DEST_DIR/"
+# Copy all .html files
+echo "Copying error page files..."
+cp -v "$SRC_DIR"/*.html "$DEST_DIR/"
 
 # Set proper permissions
 echo "Setting permissions..."
