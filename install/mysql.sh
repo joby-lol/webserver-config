@@ -18,6 +18,18 @@ service nginx restart
 # Generate SSL certificate
 certbot certonly --webroot -w /var/www/default -d $HOSTNAME --agree-tos --register-unsafely-without-email --non-interactive
 
+# Create MySQL SSL directory
+mkdir -p /etc/mysql/ssl
+chmod 750 /etc/mysql/ssl
+
+# Copy SSL certificates to MySQL directory
+cp /etc/letsencrypt/live/$HOSTNAME/fullchain.pem /etc/mysql/ssl/
+cp /etc/letsencrypt/live/$HOSTNAME/privkey.pem /etc/mysql/ssl/
+
+# Set proper ownership and permissions
+chown -R mysql:mysql /etc/mysql/ssl
+chmod 600 /etc/mysql/ssl/*
+
 # Configure MySQL for Unix socket authentication
 mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH auth_socket;"
 mysql -e "DELETE FROM mysql.user WHERE User='';"
@@ -36,11 +48,24 @@ sed -i '/^\[mysqld\]/a log_error = /var/log/mysql/error.log' /etc/mysql/mysql.co
 cat > /etc/mysql/mysql.conf.d/ssl.cnf << EOL
 [mysqld]
 # SSL Configuration
-ssl-ca=/etc/letsencrypt/live/$HOSTNAME/chain.pem
-ssl-cert=/etc/letsencrypt/live/$HOSTNAME/cert.pem
-ssl-key=/etc/letsencrypt/live/$HOSTNAME/privkey.pem
+ssl=ON
+ssl_cert=/etc/mysql/ssl/fullchain.pem
+ssl_key=/etc/mysql/ssl/privkey.pem
 require_secure_transport=ON
 EOL
+
+# Create certbot renewal hook
+mkdir -p /etc/letsencrypt/renewal-hooks/post
+cat > /etc/letsencrypt/renewal-hooks/post/mysql-ssl-cert-copy.sh << EOL
+#!/bin/bash
+cp /etc/letsencrypt/live/$HOSTNAME/fullchain.pem /etc/mysql/ssl/
+cp /etc/letsencrypt/live/$HOSTNAME/privkey.pem /etc/mysql/ssl/
+chown mysql:mysql /etc/mysql/ssl/*
+chmod 600 /etc/mysql/ssl/*
+systemctl restart mysql
+EOL
+
+chmod +x /etc/letsencrypt/renewal-hooks/post/mysql-ssl-cert-copy.sh
 
 # Restart MySQL to apply changes
 systemctl restart mysql
@@ -59,10 +84,6 @@ action = iptables-multiport[name=mysql]
          nginx-banned-ips
 EOL
 
-# Ensure fail2ban can read the MySQL log
-# Note: maybe not necessary on Ubuntu, as fail2ban runs as root
-# usermod -a -G adm fail2ban
-
 # Create MySQL auth filter for fail2ban
 tee /etc/fail2ban/filter.d/mysql.conf << 'EOL'
 [Definition]
@@ -72,5 +93,8 @@ EOL
 
 # UFW setup
 ufw allow 3306/tcp
+
+# Verify SSL is enabled
+mysql -e "SHOW VARIABLES LIKE '%ssl%';"
 
 echo "MySQL installation, SSL configuration, and fail2ban setup completed."
