@@ -35,9 +35,8 @@ actionban = grep -q '^<ip> 1;$' /etc/nginx/maps/banned_ips.conf || echo '<ip> 1;
 actionunban = sed -i '/^<ip> 1;$/d' /etc/nginx/maps/banned_ips.conf && nginx -s reload
 ACTIONFILE
 
-# Test NGINX configuration
-echo "Testing NGINX configuration..."
-nginx -t
+# Reload nginx
+service nginx reload
 
 echo "Installation complete!"
 echo "Now add 'nginx-banned-ips' to the action line in your existing fail2ban jail configurations"

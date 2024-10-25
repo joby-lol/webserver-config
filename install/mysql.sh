@@ -12,6 +12,9 @@ HOSTNAME=$(hostname -f)
 # Install MySQL and Certbot
 apt install mysql-server certbot -y
 
+# Restart nginx for good measure
+service nginx restart
+
 # Generate SSL certificate
 certbot certonly --webroot -w /var/www/default -d $HOSTNAME --agree-tos --register-unsafely-without-email --non-interactive
 
