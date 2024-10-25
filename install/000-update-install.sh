@@ -16,6 +16,9 @@ apt install nginx ufw ntp fail2ban -y
 # Install PHP and necessary modules
 apt install php-fpm php-curl php-gd php-mbstring php-xml php-zip php-pdo php-mysql php-sqlite3 -y
 
+# Add ubuntu user to www-data group
+usermod -a -G www-data ubuntu
+
 # Set timezone
 timedatectl set-timezone UTC
 

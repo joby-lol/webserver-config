@@ -31,6 +31,20 @@ if [ ! -d "/etc/letsencrypt/live/$domain" ]; then
     exit 1
 fi
 
+# Create nginx config directory in web root
+NGINX_CONF_DIR="/var/www/$domain/nginx"
+if [ ! -d "$NGINX_CONF_DIR" ]; then
+    echo "Creating nginx configuration directory..."
+    mkdir -p "$NGINX_CONF_DIR"
+    chown root:www-data "$NGINX_CONF_DIR"
+    chmod 750 "$NGINX_CONF_DIR"
+    # Only try to chmod files if they exist
+    if [ "$(ls -A $NGINX_CONF_DIR)" ]; then
+        chmod 640 "$NGINX_CONF_DIR"/*
+    fi
+    echo "Created $NGINX_CONF_DIR with secure permissions"
+fi
+
 # Backup existing configuration
 backup_file="/etc/nginx/sites-available/${domain}.backup-$(date +%Y%m%d-%H%M%S)"
 cp "/etc/nginx/sites-available/$domain" "$backup_file"
@@ -57,3 +71,4 @@ systemctl reload nginx
 
 echo "Configuration update complete for $domain"
 echo "Previous configuration backed up to: $backup_file"
+echo "Site-specific nginx configurations can be added in: $NGINX_CONF_DIR"
