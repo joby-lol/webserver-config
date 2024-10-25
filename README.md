@@ -8,11 +8,11 @@ These commands will clone the tool onto your server and do the basic installatio
 
 ```bash
 # clone the repository and cd into it
-git clone https://github.com/joby-lol/webserver-config
-cd webserver-config
-# run installation script
-./install.sh
+git clone https://github.com/joby-lol/webserver-config && cd webserver-config && sudo ./install.sh
 ```
+
+Obviously you should probably at least kind of verify what that script will do before you go executing random code off the internet. You do you though.
+
 ## Adding a site
 
 To set up a site, run `add-site.sh` and it will prompt you for all the data necessary. What you will need before running it is:
